@@ -31,13 +31,13 @@ __device__ void water_roi_and_srclocs_hip_compute(int id_x, int id_y, float4 *am
     d_float8 increment_f8, locDst_f8x, locDst_f8y;
     increment_f8.f4[0] = make_float4(0.0f, 1.0f, 2.0f, 3.0f);
     increment_f8.f4[1] = make_float4(4.0f, 5.0f, 6.0f, 7.0f);
-    locDst_f8x.f4[0] = static_cast<float4>(id_x) + increment_f8.f4[0];
-    locDst_f8x.f4[1] = static_cast<float4>(id_x) + increment_f8.f4[1];
-    locDst_f8y.f4[0] = static_cast<float4>(id_y);
-    locDst_f8y.f4[1] = static_cast<float4>(id_y);
+    locDst_f8x.f4[0] = MAKE_FLOAT4((float)id_x) + increment_f8.f4[0];
+    locDst_f8x.f4[1] = MAKE_FLOAT4(id_x) + increment_f8.f4[1];
+    locDst_f8y.f4[0] = MAKE_FLOAT4(id_y);
+    locDst_f8y.f4[1] = MAKE_FLOAT4(id_y);
 
     d_float8 sinFactor_f8, cosFactor_f8;
-    sinFactor_f8.f4[0] = static_cast<float4>((sinf(fmaf(freqX, static_cast<float>(id_y), phaseX))));
+    sinFactor_f8.f4[0] = MAKE_FLOAT4((sinf(fmaf(freqX, static_cast<float>(id_y), phaseX))));
     sinFactor_f8.f4[1] = sinFactor_f8.f4[0];
     cosFactor_f8.f1[0] = cosf(fmaf(freqY, locDst_f8x.f1[0], phaseY));
     cosFactor_f8.f1[1] = cosf(fmaf(freqY, locDst_f8x.f1[1], phaseY));
@@ -79,8 +79,8 @@ __global__ void water_pkd_tensor(T *srcPtr,
     uint srcIdx = (id_z * srcStridesNH.x);
     uint dstIdx = (id_z * dstStridesNH.x) + (id_y * dstStridesNH.y) + id_x * 3;
 
-    float4 amplX_f4 = static_cast<float4>(amplXTensor[id_z]);
-    float4 amplY_f4 = static_cast<float4>(amplYTensor[id_z]);
+    float4 amplX_f4 = MAKE_FLOAT4(amplXTensor[id_z]);
+    float4 amplY_f4 = MAKE_FLOAT4(amplYTensor[id_z]);
     float freqX = freqXTensor[id_z];
     float freqY = freqYTensor[id_z];
     float phaseX = phaseXTensor[id_z];
@@ -121,8 +121,8 @@ __global__ void water_pln_tensor(T *srcPtr,
     uint srcIdx = (id_z * srcStridesNCH.x);
     uint dstIdx = (id_z * dstStridesNCH.x) + (id_y * dstStridesNCH.z) + id_x;
 
-    float4 amplX_f4 = static_cast<float4>(amplXTensor[id_z]);
-    float4 amplY_f4 = static_cast<float4>(amplYTensor[id_z]);
+    float4 amplX_f4 = MAKE_FLOAT4(amplXTensor[id_z]);
+    float4 amplY_f4 = MAKE_FLOAT4(amplYTensor[id_z]);
     float freqX = freqXTensor[id_z];
     float freqY = freqYTensor[id_z];
     float phaseX = phaseXTensor[id_z];
@@ -177,8 +177,8 @@ __global__ void water_pkd3_pln3_tensor(T *srcPtr,
     uint srcIdx = (id_z * srcStridesNH.x);
     uint dstIdx = (id_z * dstStridesNCH.x) + (id_y * dstStridesNCH.z) + id_x;
 
-    float4 amplX_f4 = static_cast<float4>(amplXTensor[id_z]);
-    float4 amplY_f4 = static_cast<float4>(amplYTensor[id_z]);
+    float4 amplX_f4 = MAKE_FLOAT4(amplXTensor[id_z]);
+    float4 amplY_f4 = MAKE_FLOAT4(amplYTensor[id_z]);
     float freqX = freqXTensor[id_z];
     float freqY = freqYTensor[id_z];
     float phaseX = phaseXTensor[id_z];
@@ -218,8 +218,8 @@ __global__ void water_pln3_pkd3_tensor(T *srcPtr,
     uint srcIdx = (id_z * srcStridesNCH.x);
     uint dstIdx = (id_z * dstStridesNH.x) + (id_y * dstStridesNH.y) + id_x * 3;
 
-    float4 amplX_f4 = static_cast<float4>(amplXTensor[id_z]);
-    float4 amplY_f4 = static_cast<float4>(amplYTensor[id_z]);
+    float4 amplX_f4 = MAKE_FLOAT4(amplXTensor[id_z]);
+    float4 amplY_f4 = MAKE_FLOAT4(amplYTensor[id_z]);
     float freqX = freqXTensor[id_z];
     float freqY = freqYTensor[id_z];
     float phaseX = phaseXTensor[id_z];
@@ -239,6 +239,12 @@ RppStatus hip_exec_water_tensor(T *srcPtr,
                                 RpptDescPtr srcDescPtr,
                                 T *dstPtr,
                                 RpptDescPtr dstDescPtr,
+                                Rpp32f *amplitudeXTensor,
+                                Rpp32f *amplitudeYTensor,
+                                Rpp32f *frequencyXTensor,
+                                Rpp32f *frequencyYTensor,
+                                Rpp32f *phaseXTensor,
+                                Rpp32f *phaseYTensor,
                                 RpptROIPtr roiTensorPtrSrc,
                                 RpptRoiType roiType,
                                 rpp::Handle& handle)
@@ -261,12 +267,12 @@ RppStatus hip_exec_water_tensor(T *srcPtr,
                            make_uint2(srcDescPtr->strides.nStride, srcDescPtr->strides.hStride),
                            dstPtr,
                            make_uint2(dstDescPtr->strides.nStride, dstDescPtr->strides.hStride),
-                           handle.GetInitHandle()->mem.mgpu.floatArr[0].floatmem,
-                           handle.GetInitHandle()->mem.mgpu.floatArr[1].floatmem,
-                           handle.GetInitHandle()->mem.mgpu.floatArr[2].floatmem,
-                           handle.GetInitHandle()->mem.mgpu.floatArr[3].floatmem,
-                           handle.GetInitHandle()->mem.mgpu.floatArr[4].floatmem,
-                           handle.GetInitHandle()->mem.mgpu.floatArr[5].floatmem,
+                           amplitudeXTensor,
+                           amplitudeYTensor,
+                           frequencyXTensor,
+                           frequencyYTensor,
+                           phaseXTensor,
+                           phaseYTensor,
                            roiTensorPtrSrc);
     }
     else if ((srcDescPtr->layout == RpptLayout::NCHW) && (dstDescPtr->layout == RpptLayout::NCHW))
@@ -281,12 +287,12 @@ RppStatus hip_exec_water_tensor(T *srcPtr,
                            dstPtr,
                            make_uint3(dstDescPtr->strides.nStride, dstDescPtr->strides.cStride, dstDescPtr->strides.hStride),
                            dstDescPtr->c,
-                           handle.GetInitHandle()->mem.mgpu.floatArr[0].floatmem,
-                           handle.GetInitHandle()->mem.mgpu.floatArr[1].floatmem,
-                           handle.GetInitHandle()->mem.mgpu.floatArr[2].floatmem,
-                           handle.GetInitHandle()->mem.mgpu.floatArr[3].floatmem,
-                           handle.GetInitHandle()->mem.mgpu.floatArr[4].floatmem,
-                           handle.GetInitHandle()->mem.mgpu.floatArr[5].floatmem,
+                           amplitudeXTensor,
+                           amplitudeYTensor,
+                           frequencyXTensor,
+                           frequencyYTensor,
+                           phaseXTensor,
+                           phaseYTensor,
                            roiTensorPtrSrc);
     }
     else if ((srcDescPtr->c == 3) && (dstDescPtr->c == 3))
@@ -302,12 +308,12 @@ RppStatus hip_exec_water_tensor(T *srcPtr,
                                make_uint2(srcDescPtr->strides.nStride, srcDescPtr->strides.hStride),
                                dstPtr,
                                make_uint3(dstDescPtr->strides.nStride, dstDescPtr->strides.cStride, dstDescPtr->strides.hStride),
-                               handle.GetInitHandle()->mem.mgpu.floatArr[0].floatmem,
-                               handle.GetInitHandle()->mem.mgpu.floatArr[1].floatmem,
-                               handle.GetInitHandle()->mem.mgpu.floatArr[2].floatmem,
-                               handle.GetInitHandle()->mem.mgpu.floatArr[3].floatmem,
-                               handle.GetInitHandle()->mem.mgpu.floatArr[4].floatmem,
-                               handle.GetInitHandle()->mem.mgpu.floatArr[5].floatmem,
+                               amplitudeXTensor,
+                               amplitudeYTensor,
+                               frequencyXTensor,
+                               frequencyYTensor,
+                               phaseXTensor,
+                               phaseYTensor,
                                roiTensorPtrSrc);
         }
         else if ((srcDescPtr->layout == RpptLayout::NCHW) && (dstDescPtr->layout == RpptLayout::NHWC))
@@ -322,12 +328,12 @@ RppStatus hip_exec_water_tensor(T *srcPtr,
                                make_uint3(srcDescPtr->strides.nStride, srcDescPtr->strides.cStride, srcDescPtr->strides.hStride),
                                dstPtr,
                                make_uint2(dstDescPtr->strides.nStride, dstDescPtr->strides.hStride),
-                               handle.GetInitHandle()->mem.mgpu.floatArr[0].floatmem,
-                               handle.GetInitHandle()->mem.mgpu.floatArr[1].floatmem,
-                               handle.GetInitHandle()->mem.mgpu.floatArr[2].floatmem,
-                               handle.GetInitHandle()->mem.mgpu.floatArr[3].floatmem,
-                               handle.GetInitHandle()->mem.mgpu.floatArr[4].floatmem,
-                               handle.GetInitHandle()->mem.mgpu.floatArr[5].floatmem,
+                               amplitudeXTensor,
+                               amplitudeYTensor,
+                               frequencyXTensor,
+                               frequencyYTensor,
+                               phaseXTensor,
+                               phaseYTensor,
                                roiTensorPtrSrc);
         }
     }
@@ -339,6 +345,12 @@ template RppStatus hip_exec_water_tensor<Rpp8u>(Rpp8u*,
                                                 RpptDescPtr,
                                                 Rpp8u*,
                                                 RpptDescPtr,
+                                                Rpp32f*,
+                                                Rpp32f*,
+                                                Rpp32f*,
+                                                Rpp32f*,
+                                                Rpp32f*,
+                                                Rpp32f*,
                                                 RpptROIPtr,
                                                 RpptRoiType,
                                                 rpp::Handle&);
@@ -347,6 +359,12 @@ template RppStatus hip_exec_water_tensor<half>(half*,
                                                 RpptDescPtr,
                                                 half*,
                                                 RpptDescPtr,
+                                                Rpp32f*,
+                                                Rpp32f*,
+                                                Rpp32f*,
+                                                Rpp32f*,
+                                                Rpp32f*,
+                                                Rpp32f*,
                                                 RpptROIPtr,
                                                 RpptRoiType,
                                                 rpp::Handle&);
@@ -355,6 +373,12 @@ template RppStatus hip_exec_water_tensor<Rpp32f>(Rpp32f*,
                                                 RpptDescPtr,
                                                 Rpp32f*,
                                                 RpptDescPtr,
+                                                Rpp32f*,
+                                                Rpp32f*,
+                                                Rpp32f*,
+                                                Rpp32f*,
+                                                Rpp32f*,
+                                                Rpp32f*,
                                                 RpptROIPtr,
                                                 RpptRoiType,
                                                 rpp::Handle&);
@@ -363,6 +387,12 @@ template RppStatus hip_exec_water_tensor<Rpp8s>(Rpp8s*,
                                                 RpptDescPtr,
                                                 Rpp8s*,
                                                 RpptDescPtr,
+                                                Rpp32f*,
+                                                Rpp32f*,
+                                                Rpp32f*,
+                                                Rpp32f*,
+                                                Rpp32f*,
+                                                Rpp32f*,
                                                 RpptROIPtr,
                                                 RpptRoiType,
                                                 rpp::Handle&);

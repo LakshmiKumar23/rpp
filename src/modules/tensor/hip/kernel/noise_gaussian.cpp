@@ -31,8 +31,8 @@ __device__ void gaussian_noise_8_hip_compute(d_float8 *pix_f8, RpptXorwowStateBo
 {
     d_float8 rngVals_f8, pixSqrt_f8;
     rpp_hip_rng_8_gaussian_f32(&rngVals_f8, xorwowState);
-    rpp_hip_math_multiply8_const(&rngVals_f8, &rngVals_f8, (float4)stdDev);
-    rpp_hip_math_add8_const(&rngVals_f8, &rngVals_f8, (float4)mean);
+    rpp_hip_math_multiply8_const(&rngVals_f8, &rngVals_f8, MAKE_FLOAT4(stdDev));
+    rpp_hip_math_add8_const(&rngVals_f8, &rngVals_f8, MAKE_FLOAT4(mean));
 
     rpp_hip_math_sqrt8(pix_f8, &pixSqrt_f8);
     rpp_hip_math_multiply8(&pixSqrt_f8, &rngVals_f8, &rngVals_f8);
@@ -46,8 +46,8 @@ __device__ void gaussian_noise_24_hip_compute(d_float24 *pix_f24, RpptXorwowStat
     rpp_hip_rng_8_gaussian_f32(&rngVals_f24.f8[0], xorwowState);
     rpp_hip_rng_8_gaussian_f32(&rngVals_f24.f8[1], xorwowState);
     rpp_hip_rng_8_gaussian_f32(&rngVals_f24.f8[2], xorwowState);
-    rpp_hip_math_multiply24_const(&rngVals_f24, &rngVals_f24, (float4)stdDev);
-    rpp_hip_math_add24_const(&rngVals_f24, &rngVals_f24, (float4)mean);
+    rpp_hip_math_multiply24_const(&rngVals_f24, &rngVals_f24, MAKE_FLOAT4(stdDev));
+    rpp_hip_math_add24_const(&rngVals_f24, &rngVals_f24, MAKE_FLOAT4(mean));
 
     rpp_hip_math_sqrt24(pix_f24, &pixSqrt_f24);
     rpp_hip_math_multiply24(&pixSqrt_f24, &rngVals_f24, &rngVals_f24);
@@ -59,8 +59,8 @@ __device__ void gaussian_noise_voxel_8_hip_compute(d_float8 *pix_f8, RpptXorwowS
 {
     d_float8 rngVals_f8, pixSqrt_f8;
     rpp_hip_rng_8_gaussian_f32(&rngVals_f8, xorwowState);
-    rpp_hip_math_multiply8_const(&rngVals_f8, &rngVals_f8, (float4)stdDev);
-    rpp_hip_math_add8_const(&rngVals_f8, &rngVals_f8, (float4)mean);
+    rpp_hip_math_multiply8_const(&rngVals_f8, &rngVals_f8, MAKE_FLOAT4(stdDev));
+    rpp_hip_math_add8_const(&rngVals_f8, &rngVals_f8, MAKE_FLOAT4(mean));
     rpp_hip_math_add8(pix_f8, &rngVals_f8, pix_f8);
 }
 
@@ -70,29 +70,29 @@ __device__ void gaussian_noise_voxel_24_hip_compute(d_float24 *pix_f24, RpptXorw
     rpp_hip_rng_8_gaussian_f32(&rngVals_f24.f8[0], xorwowState);
     rpp_hip_rng_8_gaussian_f32(&rngVals_f24.f8[1], xorwowState);
     rpp_hip_rng_8_gaussian_f32(&rngVals_f24.f8[2], xorwowState);
-    rpp_hip_math_multiply24_const(&rngVals_f24, &rngVals_f24, (float4)stdDev);
-    rpp_hip_math_add24_const(&rngVals_f24, &rngVals_f24, (float4)mean);
+    rpp_hip_math_multiply24_const(&rngVals_f24, &rngVals_f24, MAKE_FLOAT4(stdDev));
+    rpp_hip_math_add24_const(&rngVals_f24, &rngVals_f24, MAKE_FLOAT4(mean));
     rpp_hip_math_add24(pix_f24, &rngVals_f24, pix_f24);
 }
 
-__device__ void gaussian_noise_8_adjusted_input_hip_compute(uchar *srcPtr, d_float8 *pix_f8) { rpp_hip_math_multiply8_const(pix_f8, pix_f8, (float4)ONE_OVER_255); }
+__device__ void gaussian_noise_8_adjusted_input_hip_compute(uchar *srcPtr, d_float8 *pix_f8) { rpp_hip_math_multiply8_const(pix_f8, pix_f8, FLOAT4_ONE_OVER_255); }
 __device__ void gaussian_noise_8_adjusted_input_hip_compute(float *srcPtr, d_float8 *pix_f8) { }
-__device__ void gaussian_noise_8_adjusted_input_hip_compute(schar *srcPtr, d_float8 *pix_f8) { rpp_hip_math_add8_const(pix_f8, pix_f8, (float4)128.0f); rpp_hip_math_multiply8_const(pix_f8, pix_f8, (float4)ONE_OVER_255); }
+__device__ void gaussian_noise_8_adjusted_input_hip_compute(schar *srcPtr, d_float8 *pix_f8) { rpp_hip_math_add8_const(pix_f8, pix_f8, FLOAT4_128); rpp_hip_math_multiply8_const(pix_f8, pix_f8, FLOAT4_ONE_OVER_255); }
 __device__ void gaussian_noise_8_adjusted_input_hip_compute(half *srcPtr, d_float8 *pix_f8) { }
 
-__device__ void gaussian_noise_24_adjusted_input_hip_compute(uchar *srcPtr, d_float24 *pix_f24) { rpp_hip_math_multiply24_const(pix_f24, pix_f24, (float4)ONE_OVER_255); }
+__device__ void gaussian_noise_24_adjusted_input_hip_compute(uchar *srcPtr, d_float24 *pix_f24) { rpp_hip_math_multiply24_const(pix_f24, pix_f24, FLOAT4_ONE_OVER_255); }
 __device__ void gaussian_noise_24_adjusted_input_hip_compute(float *srcPtr, d_float24 *pix_f24) { }
-__device__ void gaussian_noise_24_adjusted_input_hip_compute(schar *srcPtr, d_float24 *pix_f24) { rpp_hip_math_add24_const(pix_f24, pix_f24, (float4)128.0f); rpp_hip_math_multiply24_const(pix_f24, pix_f24, (float4)ONE_OVER_255); }
+__device__ void gaussian_noise_24_adjusted_input_hip_compute(schar *srcPtr, d_float24 *pix_f24) { rpp_hip_math_add24_const(pix_f24, pix_f24, FLOAT4_128); rpp_hip_math_multiply24_const(pix_f24, pix_f24, FLOAT4_ONE_OVER_255); }
 __device__ void gaussian_noise_24_adjusted_input_hip_compute(half *srcPtr, d_float24 *pix_f24) { }
 
-__device__ void gaussian_noise_8_adjusted_output_hip_compute(uchar *srcPtr, d_float8 *pix_f8) { rpp_hip_math_multiply8_const(pix_f8, pix_f8, (float4)255.0f); }
+__device__ void gaussian_noise_8_adjusted_output_hip_compute(uchar *srcPtr, d_float8 *pix_f8) { rpp_hip_math_multiply8_const(pix_f8, pix_f8, FLOAT4_255); }
 __device__ void gaussian_noise_8_adjusted_output_hip_compute(float *srcPtr, d_float8 *pix_f8) { }
-__device__ void gaussian_noise_8_adjusted_output_hip_compute(schar *srcPtr, d_float8 *pix_f8) { rpp_hip_math_multiply8_const(pix_f8, pix_f8, (float4)255.0f); rpp_hip_math_subtract8_const(pix_f8, pix_f8, (float4)128.0f); }
+__device__ void gaussian_noise_8_adjusted_output_hip_compute(schar *srcPtr, d_float8 *pix_f8) { rpp_hip_math_multiply8_const(pix_f8, pix_f8, FLOAT4_255); rpp_hip_math_subtract8_const(pix_f8, pix_f8, FLOAT4_128); }
 __device__ void gaussian_noise_8_adjusted_output_hip_compute(half *srcPtr, d_float8 *pix_f8) { }
 
-__device__ void gaussian_noise_24_adjusted_output_hip_compute(uchar *srcPtr, d_float24 *pix_f24) { rpp_hip_math_multiply24_const(pix_f24, pix_f24, (float4)255.0f); }
+__device__ void gaussian_noise_24_adjusted_output_hip_compute(uchar *srcPtr, d_float24 *pix_f24) { rpp_hip_math_multiply24_const(pix_f24, pix_f24, FLOAT4_255); }
 __device__ void gaussian_noise_24_adjusted_output_hip_compute(float *srcPtr, d_float24 *pix_f24) { }
-__device__ void gaussian_noise_24_adjusted_output_hip_compute(schar *srcPtr, d_float24 *pix_f24) { rpp_hip_math_multiply24_const(pix_f24, pix_f24, (float4)255.0f); rpp_hip_math_subtract24_const(pix_f24, pix_f24, (float4)128.0f); }
+__device__ void gaussian_noise_24_adjusted_output_hip_compute(schar *srcPtr, d_float24 *pix_f24) { rpp_hip_math_multiply24_const(pix_f24, pix_f24, FLOAT4_255); rpp_hip_math_subtract24_const(pix_f24, pix_f24, FLOAT4_128); }
 __device__ void gaussian_noise_24_adjusted_output_hip_compute(half *srcPtr, d_float24 *pix_f24) { }
 
 template <typename T>
@@ -389,6 +389,8 @@ RppStatus hip_exec_gaussian_noise_tensor(T *srcPtr,
                                          RpptDescPtr srcDescPtr,
                                          T *dstPtr,
                                          RpptDescPtr dstDescPtr,
+                                         Rpp32f *meanTensor,
+                                         Rpp32f *stdDevTensor,
                                          RpptXorwowStateBoxMuller *xorwowInitialStatePtr,
                                          RpptROIPtr roiTensorPtrSrc,
                                          RpptRoiType roiType,
@@ -403,7 +405,7 @@ RppStatus hip_exec_gaussian_noise_tensor(T *srcPtr,
 
     Rpp32u *xorwowSeedStream;
     xorwowSeedStream = (Rpp32u *)&xorwowInitialStatePtr[1];
-    hipMemcpy(xorwowSeedStream, rngSeedStream4050, SEED_STREAM_MAX_SIZE * sizeof(Rpp32u), hipMemcpyHostToDevice);
+    CHECK_RETURN_STATUS(hipMemcpy(xorwowSeedStream, rngSeedStream4050, SEED_STREAM_MAX_SIZE * sizeof(Rpp32u), hipMemcpyHostToDevice));
 
     if ((srcDescPtr->layout == RpptLayout::NHWC) && (dstDescPtr->layout == RpptLayout::NHWC))
     {
@@ -417,8 +419,8 @@ RppStatus hip_exec_gaussian_noise_tensor(T *srcPtr,
                            make_uint2(srcDescPtr->strides.nStride, srcDescPtr->strides.hStride),
                            dstPtr,
                            make_uint2(dstDescPtr->strides.nStride, dstDescPtr->strides.hStride),
-                           handle.GetInitHandle()->mem.mgpu.floatArr[0].floatmem,
-                           handle.GetInitHandle()->mem.mgpu.floatArr[1].floatmem,
+                           meanTensor,
+                           stdDevTensor,
                            xorwowInitialStatePtr,
                            xorwowSeedStream,
                            roiTensorPtrSrc);
@@ -435,8 +437,8 @@ RppStatus hip_exec_gaussian_noise_tensor(T *srcPtr,
                            dstPtr,
                            make_uint3(dstDescPtr->strides.nStride, dstDescPtr->strides.cStride, dstDescPtr->strides.hStride),
                            dstDescPtr->c,
-                           handle.GetInitHandle()->mem.mgpu.floatArr[0].floatmem,
-                           handle.GetInitHandle()->mem.mgpu.floatArr[1].floatmem,
+                           meanTensor,
+                           stdDevTensor,
                            xorwowInitialStatePtr,
                            xorwowSeedStream,
                            roiTensorPtrSrc);
@@ -454,8 +456,8 @@ RppStatus hip_exec_gaussian_noise_tensor(T *srcPtr,
                                make_uint2(srcDescPtr->strides.nStride, srcDescPtr->strides.hStride),
                                dstPtr,
                                make_uint3(dstDescPtr->strides.nStride, dstDescPtr->strides.cStride, dstDescPtr->strides.hStride),
-                               handle.GetInitHandle()->mem.mgpu.floatArr[0].floatmem,
-                               handle.GetInitHandle()->mem.mgpu.floatArr[1].floatmem,
+                               meanTensor,
+                               stdDevTensor,
                                xorwowInitialStatePtr,
                                xorwowSeedStream,
                                roiTensorPtrSrc);
@@ -472,8 +474,8 @@ RppStatus hip_exec_gaussian_noise_tensor(T *srcPtr,
                                make_uint3(srcDescPtr->strides.nStride, srcDescPtr->strides.cStride, srcDescPtr->strides.hStride),
                                dstPtr,
                                make_uint2(dstDescPtr->strides.nStride, dstDescPtr->strides.hStride),
-                               handle.GetInitHandle()->mem.mgpu.floatArr[0].floatmem,
-                               handle.GetInitHandle()->mem.mgpu.floatArr[1].floatmem,
+                               meanTensor,
+                               stdDevTensor,
                                xorwowInitialStatePtr,
                                xorwowSeedStream,
                                roiTensorPtrSrc);
@@ -590,6 +592,8 @@ template RppStatus hip_exec_gaussian_noise_tensor<Rpp8u>(Rpp8u*,
                                                          RpptDescPtr,
                                                          Rpp8u*,
                                                          RpptDescPtr,
+                                                         Rpp32f*,
+                                                         Rpp32f*,
                                                          RpptXorwowStateBoxMuller*,
                                                          RpptROIPtr,
                                                          RpptRoiType,
@@ -599,6 +603,8 @@ template RppStatus hip_exec_gaussian_noise_tensor<half>(half*,
                                                         RpptDescPtr,
                                                         half*,
                                                         RpptDescPtr,
+                                                        Rpp32f*,
+                                                        Rpp32f*,
                                                         RpptXorwowStateBoxMuller*,
                                                         RpptROIPtr,
                                                         RpptRoiType,
@@ -608,6 +614,8 @@ template RppStatus hip_exec_gaussian_noise_tensor<Rpp32f>(Rpp32f*,
                                                           RpptDescPtr,
                                                           Rpp32f*,
                                                           RpptDescPtr,
+                                                          Rpp32f*,
+                                                          Rpp32f*,
                                                           RpptXorwowStateBoxMuller*,
                                                           RpptROIPtr,
                                                           RpptRoiType,
@@ -617,6 +625,8 @@ template RppStatus hip_exec_gaussian_noise_tensor<Rpp8s>(Rpp8s*,
                                                          RpptDescPtr,
                                                          Rpp8s*,
                                                          RpptDescPtr,
+                                                         Rpp32f*,
+                                                         Rpp32f*,
                                                          RpptXorwowStateBoxMuller*,
                                                          RpptROIPtr,
                                                          RpptRoiType,

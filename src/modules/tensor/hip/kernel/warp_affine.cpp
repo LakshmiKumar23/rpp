@@ -31,7 +31,7 @@ __device__ void warp_affine_srclocs_hip_compute(float affineMatrixElement, float
 {
     d_float8 increment_f8;
     increment_f8.f4[0] = make_float4(0, affineMatrixElement, affineMatrixElement + affineMatrixElement, affineMatrixElement + affineMatrixElement + affineMatrixElement);
-    increment_f8.f4[1] = (float4)(affineMatrixElement + increment_f8.f4[0].w) + increment_f8.f4[0];
+    increment_f8.f4[1] = MAKE_FLOAT4(affineMatrixElement + increment_f8.f4[0].w) + increment_f8.f4[0];
     locSrcPtr_f8->f4[0] = locSrcComponent_f4 + increment_f8.f4[0];
     locSrcPtr_f8->f4[1] = locSrcComponent_f4 + increment_f8.f4[1];
 }
@@ -45,8 +45,8 @@ __device__ void warp_affine_roi_and_srclocs_hip_compute(int4 *srcRoiPtr_i4, int 
     locDst_f2.y = (float) (id_y - roiHalfHeight);
     locSrc_f2.x = fmaf(locDst_f2.x, affineMatrix_f6->f1[0], fmaf(locDst_f2.y, affineMatrix_f6->f1[1], affineMatrix_f6->f1[2])) + roiHalfWidth;
     locSrc_f2.y = fmaf(locDst_f2.x, affineMatrix_f6->f1[3], fmaf(locDst_f2.y, affineMatrix_f6->f1[4], affineMatrix_f6->f1[5])) + roiHalfHeight;
-    warp_affine_srclocs_hip_compute(affineMatrix_f6->f1[0], (float4)locSrc_f2.x, &(locSrc_f16->f8[0]));    // Compute 8 locSrcX
-    warp_affine_srclocs_hip_compute(affineMatrix_f6->f1[3], (float4)locSrc_f2.y, &(locSrc_f16->f8[1]));    // Compute 8 locSrcY
+    warp_affine_srclocs_hip_compute(affineMatrix_f6->f1[0], MAKE_FLOAT4(locSrc_f2.x), &(locSrc_f16->f8[0]));    // Compute 8 locSrcX
+    warp_affine_srclocs_hip_compute(affineMatrix_f6->f1[3], MAKE_FLOAT4(locSrc_f2.y), &(locSrc_f16->f8[1]));    // Compute 8 locSrcY
 }
 
 // -------------------- Set 1 - Bilinear Interpolation --------------------
@@ -340,7 +340,7 @@ RppStatus hip_exec_warp_affine_tensor(T *srcPtr,
                                       RpptDescPtr srcDescPtr,
                                       T *dstPtr,
                                       RpptDescPtr dstDescPtr,
-                                      Rpp32f *affineTensor,
+                                      Rpp32f *affineTensorPtr,
                                       RpptInterpolationType interpolationType,
                                       RpptROIPtr roiTensorPtrSrc,
                                       RpptRoiType roiType,
@@ -352,9 +352,6 @@ RppStatus hip_exec_warp_affine_tensor(T *srcPtr,
     int globalThreads_x = (dstDescPtr->strides.hStride + 7) >> 3;
     int globalThreads_y = dstDescPtr->h;
     int globalThreads_z = handle.GetBatchSize();
-
-    float *affineTensorPtr = handle.GetInitHandle()->mem.mgpu.scratchBufferHip.floatmem;
-    CHECK_RETURN_STATUS(hipMemcpy(affineTensorPtr, affineTensor, 6 * handle.GetBatchSize() * sizeof(float), hipMemcpyHostToDevice));
 
     if (interpolationType == RpptInterpolationType::BILINEAR)
     {

@@ -30,14 +30,14 @@ __device__ void non_linear_blend_gaussian_hip_compute(float &multiplier, int2 &h
     rowLocComponent = idXY_i2.y - halfDimsWH_i2.y;
     rowLocComponent *= (rowLocComponent * multiplier);
 
-    float4 rowLocComponent_f4 = (float4)rowLocComponent;
-    float4 multiplier_f4 = (float4)multiplier;
+    float4 rowLocComponent_f4 = MAKE_FLOAT4(rowLocComponent);
+    float4 multiplier_f4 = MAKE_FLOAT4(multiplier);
 
     d_float8 colLocComponent_f8;
     colLocComponent_f8.f4[0] = make_float4(idXY_i2.x, idXY_i2.x + 1, idXY_i2.x + 2, idXY_i2.x + 3);
-    colLocComponent_f8.f4[1] = colLocComponent_f8.f4[0] + (float4)4;
-    colLocComponent_f8.f4[0] -= (float4)halfDimsWH_i2.x;
-    colLocComponent_f8.f4[1] -= (float4)halfDimsWH_i2.x;
+    colLocComponent_f8.f4[1] = colLocComponent_f8.f4[0] + MAKE_FLOAT4(4);
+    colLocComponent_f8.f4[0] -= MAKE_FLOAT4(halfDimsWH_i2.x);
+    colLocComponent_f8.f4[1] -= MAKE_FLOAT4(halfDimsWH_i2.x);
     colLocComponent_f8.f4[0] = (colLocComponent_f8.f4[0] * colLocComponent_f8.f4[0] * multiplier_f4) + rowLocComponent_f4;
     colLocComponent_f8.f4[1] = (colLocComponent_f8.f4[1] * colLocComponent_f8.f4[1] * multiplier_f4) + rowLocComponent_f4;
 
@@ -223,6 +223,7 @@ RppStatus hip_exec_non_linear_blend_tensor(T *srcPtr1,
                                            RpptDescPtr srcDescPtr,
                                            T *dstPtr,
                                            RpptDescPtr dstDescPtr,
+                                           Rpp32f *stdDevTensor,
                                            RpptROIPtr roiTensorPtrSrc,
                                            RpptRoiType roiType,
                                            rpp::Handle& handle)
@@ -248,7 +249,7 @@ RppStatus hip_exec_non_linear_blend_tensor(T *srcPtr1,
                            make_uint2(srcDescPtr->strides.nStride, srcDescPtr->strides.hStride),
                            dstPtr,
                            make_uint2(dstDescPtr->strides.nStride, dstDescPtr->strides.hStride),
-                           handle.GetInitHandle()->mem.mgpu.floatArr[0].floatmem,
+                           stdDevTensor,
                            roiTensorPtrSrc);
     }
     else if ((srcDescPtr->layout == RpptLayout::NCHW) && (dstDescPtr->layout == RpptLayout::NCHW))
@@ -264,7 +265,7 @@ RppStatus hip_exec_non_linear_blend_tensor(T *srcPtr1,
                            dstPtr,
                            make_uint3(dstDescPtr->strides.nStride, dstDescPtr->strides.cStride, dstDescPtr->strides.hStride),
                            dstDescPtr->c,
-                           handle.GetInitHandle()->mem.mgpu.floatArr[0].floatmem,
+                           stdDevTensor,
                            roiTensorPtrSrc);
     }
     else if ((srcDescPtr->c == 3) && (dstDescPtr->c == 3))
@@ -281,7 +282,7 @@ RppStatus hip_exec_non_linear_blend_tensor(T *srcPtr1,
                                make_uint2(srcDescPtr->strides.nStride, srcDescPtr->strides.hStride),
                                dstPtr,
                                make_uint3(dstDescPtr->strides.nStride, dstDescPtr->strides.cStride, dstDescPtr->strides.hStride),
-                               handle.GetInitHandle()->mem.mgpu.floatArr[0].floatmem,
+                               stdDevTensor,
                                roiTensorPtrSrc);
         }
         else if ((srcDescPtr->layout == RpptLayout::NCHW) && (dstDescPtr->layout == RpptLayout::NHWC))
@@ -297,7 +298,7 @@ RppStatus hip_exec_non_linear_blend_tensor(T *srcPtr1,
                                make_uint3(srcDescPtr->strides.nStride, srcDescPtr->strides.cStride, srcDescPtr->strides.hStride),
                                dstPtr,
                                make_uint2(dstDescPtr->strides.nStride, dstDescPtr->strides.hStride),
-                               handle.GetInitHandle()->mem.mgpu.floatArr[0].floatmem,
+                               stdDevTensor,
                                roiTensorPtrSrc);
         }
     }
@@ -310,6 +311,7 @@ template RppStatus hip_exec_non_linear_blend_tensor<Rpp8u>(Rpp8u*,
                                                            RpptDescPtr,
                                                            Rpp8u*,
                                                            RpptDescPtr,
+                                                           Rpp32f*,
                                                            RpptROIPtr,
                                                            RpptRoiType,
                                                            rpp::Handle&);
@@ -319,6 +321,7 @@ template RppStatus hip_exec_non_linear_blend_tensor<half>(half*,
                                                           RpptDescPtr,
                                                           half*,
                                                           RpptDescPtr,
+                                                          Rpp32f*,
                                                           RpptROIPtr,
                                                           RpptRoiType,
                                                           rpp::Handle&);
@@ -328,6 +331,7 @@ template RppStatus hip_exec_non_linear_blend_tensor<Rpp32f>(Rpp32f*,
                                                             RpptDescPtr,
                                                             Rpp32f*,
                                                             RpptDescPtr,
+                                                            Rpp32f*,
                                                             RpptROIPtr,
                                                             RpptRoiType,
                                                             rpp::Handle&);
@@ -337,6 +341,7 @@ template RppStatus hip_exec_non_linear_blend_tensor<Rpp8s>(Rpp8s*,
                                                            RpptDescPtr,
                                                            Rpp8s*,
                                                            RpptDescPtr,
+                                                           Rpp32f*,
                                                            RpptROIPtr,
                                                            RpptRoiType,
                                                            rpp::Handle&);

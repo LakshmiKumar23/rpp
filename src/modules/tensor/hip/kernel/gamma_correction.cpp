@@ -26,15 +26,15 @@ SOFTWARE.
 
 __device__ void gamma_correction_hip_compute(uchar *srcPtr, d_float8 *src_f8, d_float8 *dst_f8, float *gammaLUT)
 {
-    dst_f8->f4[0] = make_float4(gammaLUT[(int) src_f8->f1[0]], gammaLUT[(int) src_f8->f1[1]], gammaLUT[(int) src_f8->f1[2]], gammaLUT[(int) src_f8->f1[3]]) * (float4) 255.0;
-    dst_f8->f4[1] = make_float4(gammaLUT[(int) src_f8->f1[4]], gammaLUT[(int) src_f8->f1[5]], gammaLUT[(int) src_f8->f1[6]], gammaLUT[(int) src_f8->f1[7]]) * (float4) 255.0;
+    dst_f8->f4[0] = make_float4(gammaLUT[(int) src_f8->f1[0]], gammaLUT[(int) src_f8->f1[1]], gammaLUT[(int) src_f8->f1[2]], gammaLUT[(int) src_f8->f1[3]]) * FLOAT4_255;
+    dst_f8->f4[1] = make_float4(gammaLUT[(int) src_f8->f1[4]], gammaLUT[(int) src_f8->f1[5]], gammaLUT[(int) src_f8->f1[6]], gammaLUT[(int) src_f8->f1[7]]) * FLOAT4_255;
 }
 
 __device__ void gamma_correction_hip_compute(float *srcPtr, d_float8 *src_f8, d_float8 *dst_f8, float *gammaLUT)
 {
     d_float8 srcNorm_f8;
-    srcNorm_f8.f4[0] = src_f8->f4[0] * (float4) 255.0;
-    srcNorm_f8.f4[1] = src_f8->f4[1] * (float4) 255.0;
+    srcNorm_f8.f4[0] = src_f8->f4[0] * FLOAT4_255;
+    srcNorm_f8.f4[1] = src_f8->f4[1] * FLOAT4_255;
 
     dst_f8->f4[0] = make_float4(gammaLUT[(int) srcNorm_f8.f1[0]], gammaLUT[(int) srcNorm_f8.f1[1]], gammaLUT[(int) srcNorm_f8.f1[2]], gammaLUT[(int) srcNorm_f8.f1[3]]);
     dst_f8->f4[1] = make_float4(gammaLUT[(int) srcNorm_f8.f1[4]], gammaLUT[(int) srcNorm_f8.f1[5]], gammaLUT[(int) srcNorm_f8.f1[6]], gammaLUT[(int) srcNorm_f8.f1[7]]);
@@ -43,18 +43,18 @@ __device__ void gamma_correction_hip_compute(float *srcPtr, d_float8 *src_f8, d_
 __device__ void gamma_correction_hip_compute(signed char *srcPtr, d_float8 *src_f8, d_float8 *dst_f8, float *gammaLUT)
 {
     d_float8 srcNorm_f8;
-    srcNorm_f8.f4[0] = src_f8->f4[0] + (float4)128;
-    srcNorm_f8.f4[1] = src_f8->f4[1] + (float4)128;
+    srcNorm_f8.f4[0] = src_f8->f4[0] + FLOAT4_128;
+    srcNorm_f8.f4[1] = src_f8->f4[1] + FLOAT4_128;
 
-    dst_f8->f4[0] = (make_float4(gammaLUT[(int) srcNorm_f8.f1[0]], gammaLUT[(int) srcNorm_f8.f1[1]], gammaLUT[(int) srcNorm_f8.f1[2]], gammaLUT[(int) srcNorm_f8.f1[3]]) * (float4) 255) - (float4) 128;
-    dst_f8->f4[1] = (make_float4(gammaLUT[(int) srcNorm_f8.f1[4]], gammaLUT[(int) srcNorm_f8.f1[5]], gammaLUT[(int) srcNorm_f8.f1[6]], gammaLUT[(int) srcNorm_f8.f1[7]]) * (float4) 255) - (float4) 128;
+    dst_f8->f4[0] = (make_float4(gammaLUT[(int) srcNorm_f8.f1[0]], gammaLUT[(int) srcNorm_f8.f1[1]], gammaLUT[(int) srcNorm_f8.f1[2]], gammaLUT[(int) srcNorm_f8.f1[3]]) * FLOAT4_255) - FLOAT4_128;
+    dst_f8->f4[1] = (make_float4(gammaLUT[(int) srcNorm_f8.f1[4]], gammaLUT[(int) srcNorm_f8.f1[5]], gammaLUT[(int) srcNorm_f8.f1[6]], gammaLUT[(int) srcNorm_f8.f1[7]]) * FLOAT4_255) - FLOAT4_128;
 }
 
 __device__ void gamma_correction_hip_compute(half *srcPtr, d_float8 *src_f8, d_float8 *dst_f8, float *gammaLUT)
 {
     d_float8 srcNorm_f8;
-    srcNorm_f8.f4[0] = src_f8->f4[0] * (float4) 255.0;
-    srcNorm_f8.f4[1] = src_f8->f4[1] * (float4) 255.0;
+    srcNorm_f8.f4[0] = src_f8->f4[0] * FLOAT4_255;
+    srcNorm_f8.f4[1] = src_f8->f4[1] * FLOAT4_255;
 
     dst_f8->f4[0] = make_float4(gammaLUT[(int) srcNorm_f8.f1[0]], gammaLUT[(int) srcNorm_f8.f1[1]], gammaLUT[(int) srcNorm_f8.f1[2]], gammaLUT[(int) srcNorm_f8.f1[3]]);
     dst_f8->f4[1] = make_float4(gammaLUT[(int) srcNorm_f8.f1[4]], gammaLUT[(int) srcNorm_f8.f1[5]], gammaLUT[(int) srcNorm_f8.f1[6]], gammaLUT[(int) srcNorm_f8.f1[7]]);
@@ -213,7 +213,7 @@ __global__ void gamma_correction_lut_compute(float *gammaLUT,
     gammaLUTPtr_f8 = (d_float8_s *)&gammaLUT[gammaLutIdx];
     *(d_float8_s *)&gammaLUT_f8 = *gammaLUTPtr_f8;
 
-    float4 inv255_f4 = (float4) ONE_OVER_255;
+    float4 inv255_f4 = FLOAT4_ONE_OVER_255;
     d_float8 pixVal_f8;
 
     pixVal_f8.f4[0] = make_float4(id_x, id_x + 1, id_x + 2, id_x + 3);
@@ -239,6 +239,7 @@ RppStatus hip_exec_gamma_correction_tensor(T *srcPtr,
                                            RpptDescPtr srcDescPtr,
                                            T *dstPtr,
                                            RpptDescPtr dstDescPtr,
+                                           Rpp32f *gammaTensor,
                                            RpptROIPtr roiTensorPtrSrc,
                                            RpptRoiType roiType,
                                            rpp::Handle& handle)
@@ -257,7 +258,7 @@ RppStatus hip_exec_gamma_correction_tensor(T *srcPtr,
                        0,
                        handle.GetStream(),
                        gammaLUT,
-                       handle.GetInitHandle()->mem.mgpu.floatArr[0].floatmem);
+                       gammaTensor);
 
     globalThreads_x = (dstDescPtr->strides.hStride + 7) >> 3;
     globalThreads_y = dstDescPtr->h;
@@ -332,6 +333,7 @@ template RppStatus hip_exec_gamma_correction_tensor<Rpp8u>(Rpp8u*,
                                                            RpptDescPtr,
                                                            Rpp8u*,
                                                            RpptDescPtr,
+                                                           Rpp32f*,
                                                            RpptROIPtr,
                                                            RpptRoiType,
                                                            rpp::Handle&);
@@ -340,6 +342,7 @@ template RppStatus hip_exec_gamma_correction_tensor<half>(half*,
                                                           RpptDescPtr,
                                                           half*,
                                                           RpptDescPtr,
+                                                          Rpp32f*,
                                                           RpptROIPtr,
                                                           RpptRoiType,
                                                           rpp::Handle&);
@@ -348,6 +351,7 @@ template RppStatus hip_exec_gamma_correction_tensor<Rpp32f>(Rpp32f*,
                                                             RpptDescPtr,
                                                             Rpp32f*,
                                                             RpptDescPtr,
+                                                            Rpp32f*,
                                                             RpptROIPtr,
                                                             RpptRoiType,
                                                             rpp::Handle&);
@@ -356,6 +360,7 @@ template RppStatus hip_exec_gamma_correction_tensor<Rpp8s>(Rpp8s*,
                                                            RpptDescPtr,
                                                            Rpp8s*,
                                                            RpptDescPtr,
+                                                           Rpp32f*,
                                                            RpptROIPtr,
                                                            RpptRoiType,
                                                            rpp::Handle&);

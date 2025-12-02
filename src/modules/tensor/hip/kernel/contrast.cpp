@@ -32,7 +32,7 @@ __device__ void contrast_hip_compute(uchar *srcPtr, d_float8 *pix_f8, d_float8 *
 
 __device__ void contrast_hip_compute(float *srcPtr, d_float8 *pix_f8, d_float8 *contrastParams_f8)
 {
-    float4 normalizer_f4 = (float4) ONE_OVER_255;
+    float4 normalizer_f4 = FLOAT4_ONE_OVER_255;
 
     pix_f8->f4[0] = rpp_hip_pixel_check_0to1((pix_f8->f4[0] - (contrastParams_f8->f4[1] * normalizer_f4)) * contrastParams_f8->f4[0] + contrastParams_f8->f4[1] * normalizer_f4);
     pix_f8->f4[1] = rpp_hip_pixel_check_0to1((pix_f8->f4[1] - (contrastParams_f8->f4[1] * normalizer_f4)) * contrastParams_f8->f4[0] + contrastParams_f8->f4[1] * normalizer_f4);
@@ -40,12 +40,12 @@ __device__ void contrast_hip_compute(float *srcPtr, d_float8 *pix_f8, d_float8 *
 
 __device__ void contrast_hip_compute(schar *srcPtr, d_float8 *pix_f8, d_float8 *contrastParams_f8)
 {
-    pix_f8->f4[0] = rpp_hip_pixel_check_0to255((pix_f8->f4[0] + (float4)128 - contrastParams_f8->f4[1]) * contrastParams_f8->f4[0] + contrastParams_f8->f4[1]) - (float4)128;
-    pix_f8->f4[1] = rpp_hip_pixel_check_0to255((pix_f8->f4[1] + (float4)128 - contrastParams_f8->f4[1]) * contrastParams_f8->f4[0] + contrastParams_f8->f4[1]) - (float4)128;
+    pix_f8->f4[0] = rpp_hip_pixel_check_0to255((pix_f8->f4[0] + FLOAT4_128 - contrastParams_f8->f4[1]) * contrastParams_f8->f4[0] + contrastParams_f8->f4[1]) - FLOAT4_128;
+    pix_f8->f4[1] = rpp_hip_pixel_check_0to255((pix_f8->f4[1] + FLOAT4_128 - contrastParams_f8->f4[1]) * contrastParams_f8->f4[0] + contrastParams_f8->f4[1]) - FLOAT4_128;
 }
 __device__ void contrast_hip_compute(half *srcPtr, d_float8 *pix_f8, d_float8 *contrastParams_f8)
 {
-    float4 normalizer_f4 = (float4) ONE_OVER_255;
+    float4 normalizer_f4 = FLOAT4_ONE_OVER_255;
 
     pix_f8->f4[0] = rpp_hip_pixel_check_0to1((pix_f8->f4[0] - (contrastParams_f8->f4[1] * normalizer_f4)) * contrastParams_f8->f4[0] + contrastParams_f8->f4[1] * normalizer_f4);
     pix_f8->f4[1] = rpp_hip_pixel_check_0to1((pix_f8->f4[1] - (contrastParams_f8->f4[1] * normalizer_f4)) * contrastParams_f8->f4[0] + contrastParams_f8->f4[1] * normalizer_f4);
@@ -73,8 +73,8 @@ __global__ void contrast_pkd_hip_tensor(T *srcPtr,
     uint dstIdx = (id_z * dstStridesNH.x) + (id_y * dstStridesNH.y) + id_x;
 
     d_float8 pix_f8, contrastParams_f8;
-    contrastParams_f8.f4[0] = (float4)contrastFactor[id_z];
-    contrastParams_f8.f4[1] = (float4)contrastCenter[id_z];
+    contrastParams_f8.f4[0] = MAKE_FLOAT4(contrastFactor[id_z]);
+    contrastParams_f8.f4[1] = MAKE_FLOAT4(contrastCenter[id_z]);
 
     rpp_hip_load8_and_unpack_to_float8(srcPtr + srcIdx, &pix_f8);
     contrast_hip_compute(srcPtr, &pix_f8, &contrastParams_f8);
@@ -104,8 +104,8 @@ __global__ void contrast_pln_hip_tensor(T *srcPtr,
     uint dstIdx = (id_z * dstStridesNCH.x) + (id_y * dstStridesNCH.z) + id_x;
 
     d_float8 pix_f8, contrastParams_f8;
-    contrastParams_f8.f4[0] = (float4)(contrastFactor[id_z]);
-    contrastParams_f8.f4[1] = (float4)(contrastCenter[id_z]);
+    contrastParams_f8.f4[0] = MAKE_FLOAT4(contrastFactor[id_z]);
+    contrastParams_f8.f4[1] = MAKE_FLOAT4(contrastCenter[id_z]);
 
     rpp_hip_load8_and_unpack_to_float8(srcPtr + srcIdx, &pix_f8);
     contrast_hip_compute(srcPtr, &pix_f8, &contrastParams_f8);
@@ -152,8 +152,8 @@ __global__ void contrast_pkd3_pln3_hip_tensor(T *srcPtr,
 
     d_float24 pix_f24;
     d_float8 contrastParams_f8;
-    contrastParams_f8.f4[0] = (float4)contrastFactor[id_z];
-    contrastParams_f8.f4[1] = (float4)contrastCenter[id_z];
+    contrastParams_f8.f4[0] = MAKE_FLOAT4(contrastFactor[id_z]);
+    contrastParams_f8.f4[1] = MAKE_FLOAT4(contrastCenter[id_z]);
 
     rpp_hip_load24_pkd3_and_unpack_to_float24_pln3(srcPtr + srcIdx, &pix_f24);
     contrast_hip_compute(srcPtr, &pix_f24.f8[0], &contrastParams_f8);
@@ -185,8 +185,8 @@ __global__ void contrast_pln3_pkd3_hip_tensor(T *srcPtr,
 
     d_float24 pix_f24;
     d_float8 contrastParams_f8;
-    contrastParams_f8.f4[0] = (float4)contrastFactor[id_z];
-    contrastParams_f8.f4[1] = (float4)contrastCenter[id_z];
+    contrastParams_f8.f4[0] = MAKE_FLOAT4(contrastFactor[id_z]);
+    contrastParams_f8.f4[1] = MAKE_FLOAT4(contrastCenter[id_z]);
 
     rpp_hip_load24_pln3_and_unpack_to_float24_pln3(srcPtr + srcIdx, srcStridesNCH.y, &pix_f24);
     contrast_hip_compute(srcPtr, &pix_f24.f8[0], &contrastParams_f8);
@@ -200,6 +200,8 @@ RppStatus hip_exec_contrast_tensor(T *srcPtr,
                                    RpptDescPtr srcDescPtr,
                                    T *dstPtr,
                                    RpptDescPtr dstDescPtr,
+                                   Rpp32f *contrastFactorTensor,
+                                   Rpp32f *contrastCenterTensor,
                                    RpptROIPtr roiTensorPtrSrc,
                                    RpptRoiType roiType,
                                    rpp::Handle& handle)
@@ -222,8 +224,8 @@ RppStatus hip_exec_contrast_tensor(T *srcPtr,
                            make_uint2(srcDescPtr->strides.nStride, srcDescPtr->strides.hStride),
                            dstPtr,
                            make_uint2(dstDescPtr->strides.nStride, dstDescPtr->strides.hStride),
-                           handle.GetInitHandle()->mem.mgpu.floatArr[0].floatmem,
-                           handle.GetInitHandle()->mem.mgpu.floatArr[1].floatmem,
+                           contrastFactorTensor,
+                           contrastCenterTensor,
                            roiTensorPtrSrc);
     }
     else if ((srcDescPtr->layout == RpptLayout::NCHW) && (dstDescPtr->layout == RpptLayout::NCHW))
@@ -238,8 +240,8 @@ RppStatus hip_exec_contrast_tensor(T *srcPtr,
                            dstPtr,
                            make_uint3(dstDescPtr->strides.nStride, dstDescPtr->strides.cStride, dstDescPtr->strides.hStride),
                            dstDescPtr->c,
-                           handle.GetInitHandle()->mem.mgpu.floatArr[0].floatmem,
-                           handle.GetInitHandle()->mem.mgpu.floatArr[1].floatmem,
+                           contrastFactorTensor,
+                           contrastCenterTensor,
                            roiTensorPtrSrc);
     }
     else if ((srcDescPtr->c == 3) && (dstDescPtr->c == 3))
@@ -255,8 +257,8 @@ RppStatus hip_exec_contrast_tensor(T *srcPtr,
                                make_uint2(srcDescPtr->strides.nStride, srcDescPtr->strides.hStride),
                                dstPtr,
                                make_uint3(dstDescPtr->strides.nStride, dstDescPtr->strides.cStride, dstDescPtr->strides.hStride),
-                               handle.GetInitHandle()->mem.mgpu.floatArr[0].floatmem,
-                               handle.GetInitHandle()->mem.mgpu.floatArr[1].floatmem,
+                               contrastFactorTensor,
+                               contrastCenterTensor,
                                roiTensorPtrSrc);
         }
         else if ((srcDescPtr->layout == RpptLayout::NCHW) && (dstDescPtr->layout == RpptLayout::NHWC))
@@ -271,8 +273,8 @@ RppStatus hip_exec_contrast_tensor(T *srcPtr,
                                make_uint3(srcDescPtr->strides.nStride, srcDescPtr->strides.cStride, srcDescPtr->strides.hStride),
                                dstPtr,
                                make_uint2(dstDescPtr->strides.nStride, dstDescPtr->strides.hStride),
-                               handle.GetInitHandle()->mem.mgpu.floatArr[0].floatmem,
-                               handle.GetInitHandle()->mem.mgpu.floatArr[1].floatmem,
+                               contrastFactorTensor,
+                               contrastCenterTensor,
                                roiTensorPtrSrc);
         }
     }
@@ -284,6 +286,8 @@ template RppStatus hip_exec_contrast_tensor<Rpp8u>(Rpp8u*,
                                                    RpptDescPtr,
                                                    Rpp8u*,
                                                    RpptDescPtr,
+                                                   Rpp32f*,
+                                                   Rpp32f*,
                                                    RpptROIPtr,
                                                    RpptRoiType,
                                                    rpp::Handle&);
@@ -292,6 +296,8 @@ template RppStatus hip_exec_contrast_tensor<half>(half*,
                                                   RpptDescPtr,
                                                   half*,
                                                   RpptDescPtr,
+                                                  Rpp32f*,
+                                                  Rpp32f*,
                                                   RpptROIPtr,
                                                   RpptRoiType,
                                                   rpp::Handle&);
@@ -300,6 +306,8 @@ template RppStatus hip_exec_contrast_tensor<Rpp32f>(Rpp32f*,
                                                   RpptDescPtr,
                                                   Rpp32f*,
                                                   RpptDescPtr,
+                                                  Rpp32f*,
+                                                  Rpp32f*,
                                                   RpptROIPtr,
                                                   RpptRoiType,
                                                   rpp::Handle&);
@@ -308,6 +316,8 @@ template RppStatus hip_exec_contrast_tensor<Rpp8s>(Rpp8s*,
                                                   RpptDescPtr,
                                                   Rpp8s*,
                                                   RpptDescPtr,
+                                                  Rpp32f*,
+                                                  Rpp32f*,
                                                   RpptROIPtr,
                                                   RpptRoiType,
                                                   rpp::Handle&);

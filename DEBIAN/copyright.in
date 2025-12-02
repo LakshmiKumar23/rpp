@@ -1,7 +1,10 @@
-/*
-MIT License
-
-Copyright (c) 2019 - 2025 Advanced Micro Devices, Inc.
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: @DEB_PACKAGE_NAME@
+Upstream-Contact: @DEB_MAINTAINER_NAME@ <@DEB_MAINTAINER_EMAIL@>
+Source: https://github.com/ROCm/@DEB_PACKAGE_NAME@
+Files: *
+License: @DEB_LICENSE@
+Copyright: @DEB_COPYRIGHT_YEAR@ Advanced Micro Devices, Inc. All rights Reserved.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -20,28 +23,3 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-*/
-
-#ifndef RPP_VERSION_H
-#define RPP_VERSION_H
-
-/*!
- * \file
- * \brief ROCm Performance Primitives (RPP) version
- * \defgroup group_rpp_version RPP Version
- * \brief ROCm Performance Primitives (RPP) version
- */
-
-// TODO: change the patch version with every new feature
-#include "rpp.h"
-#ifdef __cplusplus
-extern "C" {
-#endif
-// NOTE: IMPORTANT: Match the version with CMakelists.txt version
-#define RPP_VERSION_MAJOR 2
-#define RPP_VERSION_MINOR 0
-#define RPP_VERSION_PATCH 0
-#ifdef __cplusplus
-}
-#endif
-#endif    // RPP_VERSION_H

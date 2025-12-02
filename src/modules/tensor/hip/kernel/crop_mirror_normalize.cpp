@@ -50,8 +50,8 @@ __device__ void cmn_hip_compute(float *srcPtr, float *dstPtr, d_float8 *pix_f8, 
 
 __device__ void cmn_hip_compute(schar *srcPtr, schar *dstPtr, d_float8 *pix_f8, d_float8 *cmnParams_f8)
 {
-    pix_f8->f4[0] = rpp_hip_pixel_check_0to255((pix_f8->f4[0] + (float4)128) * cmnParams_f8->f4[0] +  cmnParams_f8->f4[1]) - (float4)128;
-    pix_f8->f4[1] = rpp_hip_pixel_check_0to255((pix_f8->f4[1] + (float4)128) * cmnParams_f8->f4[0] +  cmnParams_f8->f4[1]) - (float4)128;
+    pix_f8->f4[0] = rpp_hip_pixel_check_0to255((pix_f8->f4[0] + FLOAT4_128) * cmnParams_f8->f4[0] +  cmnParams_f8->f4[1]) - FLOAT4_128;
+    pix_f8->f4[1] = rpp_hip_pixel_check_0to255((pix_f8->f4[1] + FLOAT4_128) * cmnParams_f8->f4[0] +  cmnParams_f8->f4[1]) - FLOAT4_128;
 }
 __device__ void cmn_hip_compute(half *srcPtr, half *dstPtr, d_float8 *pix_f8, d_float8 *cmnParams_f8)
 {
@@ -105,12 +105,12 @@ __global__ void crop_mirror_normalize_pkd_hip_tensor(T *srcPtr,
     int cmnParamLoc = id_z * 3;
     int3 cmnParamLocs = make_int3(cmnParamLoc, cmnParamLoc + 1, cmnParamLoc + 2);
     d_float8 cmnParamsR_f8, cmnParamsG_f8, cmnParamsB_f8;
-    cmnParamsR_f8.f4[0] = (float4)multiplierTensor[cmnParamLocs.x];      // Get multiplier for R channel
-    cmnParamsR_f8.f4[1] = (float4)offsetTensor[cmnParamLocs.x];          // Get offset for R channel
-    cmnParamsG_f8.f4[0] = (float4)multiplierTensor[cmnParamLocs.y];  // Get multiplier for G channel
-    cmnParamsG_f8.f4[1] = (float4)offsetTensor[cmnParamLocs.y];      // Get offset for G channel
-    cmnParamsB_f8.f4[0] = (float4)multiplierTensor[cmnParamLocs.z];  // Get multiplier for B channel
-    cmnParamsB_f8.f4[1] = (float4)offsetTensor[cmnParamLocs.z];      // Get offset for B channel
+    cmnParamsR_f8.f4[0] = MAKE_FLOAT4(multiplierTensor[cmnParamLocs.x]);      // Get multiplier for R channel
+    cmnParamsR_f8.f4[1] = MAKE_FLOAT4(offsetTensor[cmnParamLocs.x]);          // Get offset for R channel
+    cmnParamsG_f8.f4[0] = MAKE_FLOAT4(multiplierTensor[cmnParamLocs.y]);  // Get multiplier for G channel
+    cmnParamsG_f8.f4[1] = MAKE_FLOAT4(offsetTensor[cmnParamLocs.y]);      // Get offset for G channel
+    cmnParamsB_f8.f4[0] = MAKE_FLOAT4(multiplierTensor[cmnParamLocs.z]);  // Get multiplier for B channel
+    cmnParamsB_f8.f4[1] = MAKE_FLOAT4(offsetTensor[cmnParamLocs.z]);      // Get offset for B channel
 
     cmn_hip_compute(srcPtr, dstPtr, &pix_f24.f8[0], &cmnParamsR_f8);
     cmn_hip_compute(srcPtr, dstPtr, &pix_f24.f8[1], &cmnParamsG_f8);
@@ -143,8 +143,8 @@ __global__ void crop_mirror_normalize_pln_hip_tensor(T *srcPtr,
     int cmnParamLoc = id_z * channelsDst;
     int3 cmnParamLocs = make_int3(cmnParamLoc, cmnParamLoc + 1, cmnParamLoc + 2);
     d_float8 pix_f8, cmnParams_f8;
-    cmnParams_f8.f4[0] = (float4)multiplierTensor[cmnParamLocs.x];  // Get multiplier for R channel
-    cmnParams_f8.f4[1] = (float4)offsetTensor[cmnParamLocs.x];      // Get offset for R channel
+    cmnParams_f8.f4[0] = MAKE_FLOAT4(multiplierTensor[cmnParamLocs.x]);  // Get multiplier for R channel
+    cmnParams_f8.f4[1] = MAKE_FLOAT4(offsetTensor[cmnParamLocs.x]);      // Get offset for R channel
 
     if(mirrorTensor[id_z] == 1)
     {
@@ -169,8 +169,8 @@ __global__ void crop_mirror_normalize_pln_hip_tensor(T *srcPtr,
             srcIdx += srcStridesNCH.y;
             dstIdx += dstStridesNCH.y;
 
-            cmnParams_f8.f4[0] = (float4)multiplierTensor[cmnParamLocs.y];  // Get multiplier for G channel
-            cmnParams_f8.f4[1] = (float4)offsetTensor[cmnParamLocs.y];      // Get offset for G channel
+            cmnParams_f8.f4[0] = MAKE_FLOAT4(multiplierTensor[cmnParamLocs.y]);  // Get multiplier for G channel
+            cmnParams_f8.f4[1] = MAKE_FLOAT4(offsetTensor[cmnParamLocs.y]);      // Get offset for G channel
 
             rpp_hip_load8_and_unpack_to_float8_mirror(srcPtr + srcIdx, &pix_f8);
             cmn_hip_compute(srcPtr, dstPtr, &pix_f8, &cmnParams_f8);
@@ -179,8 +179,8 @@ __global__ void crop_mirror_normalize_pln_hip_tensor(T *srcPtr,
             srcIdx += srcStridesNCH.y;
             dstIdx += dstStridesNCH.y;
 
-            cmnParams_f8.f4[0] = (float4)multiplierTensor[cmnParamLocs.z];  // Get multiplier for B channel
-            cmnParams_f8.f4[1] = (float4)offsetTensor[cmnParamLocs.z];      // Get offset for B channel
+            cmnParams_f8.f4[0] = MAKE_FLOAT4(multiplierTensor[cmnParamLocs.z]);  // Get multiplier for B channel
+            cmnParams_f8.f4[1] = MAKE_FLOAT4(offsetTensor[cmnParamLocs.z]);      // Get offset for B channel
 
             rpp_hip_load8_and_unpack_to_float8_mirror(srcPtr + srcIdx, &pix_f8);
             cmn_hip_compute(srcPtr, dstPtr, &pix_f8, &cmnParams_f8);
@@ -199,8 +199,8 @@ __global__ void crop_mirror_normalize_pln_hip_tensor(T *srcPtr,
             srcIdx += srcStridesNCH.y;
             dstIdx += dstStridesNCH.y;
 
-            cmnParams_f8.f4[0] = (float4)multiplierTensor[cmnParamLocs.y];  // Get multiplier for G channel
-            cmnParams_f8.f4[1] = (float4)offsetTensor[cmnParamLocs.y];      // Get offset for G channel
+            cmnParams_f8.f4[0] = MAKE_FLOAT4(multiplierTensor[cmnParamLocs.y]);  // Get multiplier for G channel
+            cmnParams_f8.f4[1] = MAKE_FLOAT4(offsetTensor[cmnParamLocs.y]);      // Get offset for G channel
 
             rpp_hip_load8_and_unpack_to_float8(srcPtr + srcIdx, &pix_f8);
             cmn_hip_compute(srcPtr, dstPtr, &pix_f8, &cmnParams_f8);
@@ -209,8 +209,8 @@ __global__ void crop_mirror_normalize_pln_hip_tensor(T *srcPtr,
             srcIdx += srcStridesNCH.y;
             dstIdx += dstStridesNCH.y;
 
-            cmnParams_f8.f4[0] = (float4)multiplierTensor[cmnParamLocs.z];  // Get multiplier for B channel
-            cmnParams_f8.f4[1] = (float4)offsetTensor[cmnParamLocs.z];      // Get offset for B channel
+            cmnParams_f8.f4[0] = MAKE_FLOAT4(multiplierTensor[cmnParamLocs.z]);  // Get multiplier for B channel
+            cmnParams_f8.f4[1] = MAKE_FLOAT4(offsetTensor[cmnParamLocs.z]);      // Get offset for B channel
 
             rpp_hip_load8_and_unpack_to_float8(srcPtr + srcIdx, &pix_f8);
             cmn_hip_compute(srcPtr, dstPtr, &pix_f8, &cmnParams_f8);
@@ -265,12 +265,12 @@ __global__ void crop_mirror_normalize_pkd3_pln3_hip_tensor(T *srcPtr,
     int cmnParamLoc = id_z * 3;
     int3 cmnParamLocs = make_int3(cmnParamLoc, cmnParamLoc + 1, cmnParamLoc + 2);
     d_float8 cmnParamsR_f8, cmnParamsG_f8, cmnParamsB_f8;
-    cmnParamsR_f8.f4[0] = (float4)multiplierTensor[cmnParamLocs.x];      // Get multiplier for R channel
-    cmnParamsR_f8.f4[1] = (float4)offsetTensor[cmnParamLocs.x];          // Get offset for R channel
-    cmnParamsG_f8.f4[0] = (float4)multiplierTensor[cmnParamLocs.y];  // Get multiplier for G channel
-    cmnParamsG_f8.f4[1] = (float4)offsetTensor[cmnParamLocs.y];      // Get offset for G channel
-    cmnParamsB_f8.f4[0] = (float4)multiplierTensor[cmnParamLocs.z];  // Get multiplier for B channel
-    cmnParamsB_f8.f4[1] = (float4)offsetTensor[cmnParamLocs.z];      // Get offset for B channel
+    cmnParamsR_f8.f4[0] = MAKE_FLOAT4(multiplierTensor[cmnParamLocs.x]);      // Get multiplier for R channel
+    cmnParamsR_f8.f4[1] = MAKE_FLOAT4(offsetTensor[cmnParamLocs.x]);          // Get offset for R channel
+    cmnParamsG_f8.f4[0] = MAKE_FLOAT4(multiplierTensor[cmnParamLocs.y]);  // Get multiplier for G channel
+    cmnParamsG_f8.f4[1] = MAKE_FLOAT4(offsetTensor[cmnParamLocs.y]);      // Get offset for G channel
+    cmnParamsB_f8.f4[0] = MAKE_FLOAT4(multiplierTensor[cmnParamLocs.z]);  // Get multiplier for B channel
+    cmnParamsB_f8.f4[1] = MAKE_FLOAT4(offsetTensor[cmnParamLocs.z]);      // Get offset for B channel
 
     cmn_hip_compute(srcPtr, dstPtr, &pix_f24.f8[0], &cmnParamsR_f8);
     cmn_hip_compute(srcPtr, dstPtr, &pix_f24.f8[1], &cmnParamsG_f8);
@@ -324,12 +324,12 @@ __global__ void crop_mirror_normalize_pln3_pkd3_hip_tensor(T *srcPtr,
     int cmnParamLoc = id_z * 3;
     int3 cmnParamLocs = make_int3(cmnParamLoc, cmnParamLoc + 1, cmnParamLoc + 2);
     d_float8 cmnParamsR_f8, cmnParamsG_f8, cmnParamsB_f8;
-    cmnParamsR_f8.f4[0] = (float4)multiplierTensor[cmnParamLocs.x];      // Get multiplier for R channel
-    cmnParamsR_f8.f4[1] = (float4)offsetTensor[cmnParamLocs.x];          // Get offset for R channel
-    cmnParamsG_f8.f4[0] = (float4)multiplierTensor[cmnParamLocs.y];  // Get multiplier for G channel
-    cmnParamsG_f8.f4[1] = (float4)offsetTensor[cmnParamLocs.y];      // Get offset for G channel
-    cmnParamsB_f8.f4[0] = (float4)multiplierTensor[cmnParamLocs.z];  // Get multiplier for B channel
-    cmnParamsB_f8.f4[1] = (float4)offsetTensor[cmnParamLocs.z];      // Get offset for B channel
+    cmnParamsR_f8.f4[0] = MAKE_FLOAT4(multiplierTensor[cmnParamLocs.x]);      // Get multiplier for R channel
+    cmnParamsR_f8.f4[1] = MAKE_FLOAT4(offsetTensor[cmnParamLocs.x]);          // Get offset for R channel
+    cmnParamsG_f8.f4[0] = MAKE_FLOAT4(multiplierTensor[cmnParamLocs.y]);  // Get multiplier for G channel
+    cmnParamsG_f8.f4[1] = MAKE_FLOAT4(offsetTensor[cmnParamLocs.y]);      // Get offset for G channel
+    cmnParamsB_f8.f4[0] = MAKE_FLOAT4(multiplierTensor[cmnParamLocs.z]);  // Get multiplier for B channel
+    cmnParamsB_f8.f4[1] = MAKE_FLOAT4(offsetTensor[cmnParamLocs.z]);      // Get offset for B channel
 
     cmn_hip_compute(srcPtr, dstPtr, &pix_f24.f8[0], &cmnParamsR_f8);
     cmn_hip_compute(srcPtr, dstPtr, &pix_f24.f8[1], &cmnParamsG_f8);
@@ -342,6 +342,9 @@ RppStatus hip_exec_crop_mirror_normalize_tensor(T *srcPtr,
                                                 RpptDescPtr srcDescPtr,
                                                 U *dstPtr,
                                                 RpptDescPtr dstDescPtr,
+                                                Rpp32f *offsetTensor,
+                                                Rpp32f *multiplierTensor,
+                                                Rpp32u *mirrorTensor,
                                                 RpptROIPtr roiTensorPtrSrc,
                                                 RpptRoiType roiType,
                                                 rpp::Handle& handle)
@@ -364,9 +367,9 @@ RppStatus hip_exec_crop_mirror_normalize_tensor(T *srcPtr,
                            make_uint2(srcDescPtr->strides.nStride, srcDescPtr->strides.hStride),
                            dstPtr,
                            make_uint2(dstDescPtr->strides.nStride, dstDescPtr->strides.hStride),
-                           handle.GetInitHandle()->mem.mgpu.float3Arr[0].floatmem,
-                           handle.GetInitHandle()->mem.mgpu.float3Arr[1].floatmem,
-                           handle.GetInitHandle()->mem.mgpu.uintArr[2].uintmem,
+                           offsetTensor,
+                           multiplierTensor,
+                           mirrorTensor,
                            roiTensorPtrSrc);
     }
     else if ((srcDescPtr->layout == RpptLayout::NCHW) && (dstDescPtr->layout == RpptLayout::NCHW))
@@ -383,9 +386,9 @@ RppStatus hip_exec_crop_mirror_normalize_tensor(T *srcPtr,
                                dstPtr,
                                make_uint3(dstDescPtr->strides.nStride, dstDescPtr->strides.cStride, dstDescPtr->strides.hStride),
                                dstDescPtr->c,
-                               handle.GetInitHandle()->mem.mgpu.floatArr[0].floatmem,
-                               handle.GetInitHandle()->mem.mgpu.floatArr[1].floatmem,
-                               handle.GetInitHandle()->mem.mgpu.uintArr[2].uintmem,
+                               offsetTensor,
+                               multiplierTensor,
+                               mirrorTensor,
                                roiTensorPtrSrc);
         }
         else if(srcDescPtr->c == 3)
@@ -400,9 +403,9 @@ RppStatus hip_exec_crop_mirror_normalize_tensor(T *srcPtr,
                                dstPtr,
                                make_uint3(dstDescPtr->strides.nStride, dstDescPtr->strides.cStride, dstDescPtr->strides.hStride),
                                dstDescPtr->c,
-                               handle.GetInitHandle()->mem.mgpu.float3Arr[0].floatmem,
-                               handle.GetInitHandle()->mem.mgpu.float3Arr[1].floatmem,
-                               handle.GetInitHandle()->mem.mgpu.uintArr[2].uintmem,
+                               offsetTensor,
+                               multiplierTensor,
+                               mirrorTensor,
                                roiTensorPtrSrc);
         }
     }
@@ -419,9 +422,9 @@ RppStatus hip_exec_crop_mirror_normalize_tensor(T *srcPtr,
                                make_uint2(srcDescPtr->strides.nStride, srcDescPtr->strides.hStride),
                                dstPtr,
                                make_uint3(dstDescPtr->strides.nStride, dstDescPtr->strides.cStride, dstDescPtr->strides.hStride),
-                               handle.GetInitHandle()->mem.mgpu.float3Arr[0].floatmem,
-                               handle.GetInitHandle()->mem.mgpu.float3Arr[1].floatmem,
-                               handle.GetInitHandle()->mem.mgpu.uintArr[2].uintmem,
+                               offsetTensor,
+                               multiplierTensor,
+                               mirrorTensor,
                                roiTensorPtrSrc);
         }
         else if ((srcDescPtr->layout == RpptLayout::NCHW) && (dstDescPtr->layout == RpptLayout::NHWC))
@@ -436,9 +439,9 @@ RppStatus hip_exec_crop_mirror_normalize_tensor(T *srcPtr,
                                make_uint3(srcDescPtr->strides.nStride, srcDescPtr->strides.cStride, srcDescPtr->strides.hStride),
                                dstPtr,
                                make_uint2(dstDescPtr->strides.nStride, dstDescPtr->strides.hStride),
-                               handle.GetInitHandle()->mem.mgpu.float3Arr[0].floatmem,
-                               handle.GetInitHandle()->mem.mgpu.float3Arr[1].floatmem,
-                               handle.GetInitHandle()->mem.mgpu.uintArr[2].uintmem,
+                               offsetTensor,
+                               multiplierTensor,
+                               mirrorTensor,
                                roiTensorPtrSrc);
         }
     }
@@ -449,6 +452,9 @@ template RppStatus hip_exec_crop_mirror_normalize_tensor<Rpp8u, Rpp8u>(Rpp8u*,
                                                                 RpptDescPtr,
                                                                 Rpp8u*,
                                                                 RpptDescPtr,
+                                                                Rpp32f*,
+                                                                Rpp32f*,
+                                                                Rpp32u*,
                                                                 RpptROIPtr,
                                                                 RpptRoiType,
                                                                 rpp::Handle&);
@@ -457,6 +463,9 @@ template RppStatus hip_exec_crop_mirror_normalize_tensor<half, half>(half*,
                                                                RpptDescPtr,
                                                                half*,
                                                                RpptDescPtr,
+                                                               Rpp32f*,
+                                                               Rpp32f*,
+                                                               Rpp32u*,
                                                                RpptROIPtr,
                                                                RpptRoiType,
                                                                rpp::Handle&);
@@ -465,6 +474,9 @@ template RppStatus hip_exec_crop_mirror_normalize_tensor<Rpp32f, Rpp32f>(Rpp32f*
                                                                          RpptDescPtr,
                                                                          Rpp32f*,
                                                                          RpptDescPtr,
+                                                                         Rpp32f*,
+                                                                         Rpp32f*,
+                                                                         Rpp32u*,
                                                                          RpptROIPtr,
                                                                          RpptRoiType,
                                                                          rpp::Handle&);
@@ -473,6 +485,9 @@ template RppStatus hip_exec_crop_mirror_normalize_tensor<Rpp8s, Rpp8s>(Rpp8s*,
                                                                        RpptDescPtr,
                                                                        Rpp8s*,
                                                                        RpptDescPtr,
+                                                                       Rpp32f*,
+                                                                       Rpp32f*,
+                                                                       Rpp32u*,
                                                                        RpptROIPtr,
                                                                        RpptRoiType,
                                                                        rpp::Handle&);
@@ -481,6 +496,9 @@ template RppStatus hip_exec_crop_mirror_normalize_tensor<Rpp8u, Rpp32f>(Rpp8u*,
                                                                         RpptDescPtr,
                                                                         Rpp32f*,
                                                                         RpptDescPtr,
+                                                                        Rpp32f*,
+                                                                        Rpp32f*,
+                                                                        Rpp32u*,
                                                                         RpptROIPtr,
                                                                         RpptRoiType,
                                                                         rpp::Handle&);
@@ -489,6 +507,9 @@ template RppStatus hip_exec_crop_mirror_normalize_tensor<Rpp8u, half>(Rpp8u*,
                                                                       RpptDescPtr,
                                                                       half*,
                                                                       RpptDescPtr,
+                                                                      Rpp32f*,
+                                                                      Rpp32f*,
+                                                                      Rpp32u*,
                                                                       RpptROIPtr,
                                                                       RpptRoiType,
                                                                       rpp::Handle&);
